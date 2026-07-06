@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeneFreq BME - Advanced Genotypic & Allelic Calculator</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#edd9ff',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              950: '#0f0a1c',
+            },
+            darkbg: '#090514',
+            panel: '#130d24',
+            panelLight: '#ffffff',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #130d24;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4c1d95;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8b5cf6;
+    }
+  </style>
+</head>
+<body class="bg-[#090514] text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- Main Container -->
+  <div class="flex flex-col min-h-screen">
+    
+    <!-- Header -->
+    <header class="border-b border-brand-950 bg-[#0d071c]/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-brand-600/20 border border-brand-500/30 rounded-xl text-brand-400">
+            <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+              GeneFreq <span class="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">BME</span>
+              <span class="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 bg-brand-500/10 border border-brand-500/20 text-brand-300 rounded">v2.5</span>
+            </h1>
+            <p class="text-xs text-slate-400">SNP Population Genetics & Hardy-Weinberg Statistical Engine</p>
+          </div>
+        </div>
+
+        <!-- System Controls -->
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <!-- Setup API Key Modal trigger -->
+          <button onclick="openApiKeyModal()" id="apiKeyBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-slate-800/80 border border-slate-700 text-slate-300 hover:border-brand-500 hover:text-white transition-all">
+            <i data-lucide="key" class="w-3.5 h-3.5"></i>
+            <span id="apiStatusText">Setup Gemini AI</span>
+          </button>
+          
+          <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white transition-colors">
+            <i id="themeIcon" data-lucide="sun" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Panel: Inputs & Setup (5 cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-6">
+        
+        <!-- Tab Selectors -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-1.5 flex gap-1">
+          <button onclick="switchTab('biallelic')" id="tab-biallelic" class="flex-1 py-2 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 bg-brand-600 text-white shadow-lg shadow-brand-950/20">
+            <i data-lucide="binary" class="w-4 h-4"></i> Biallelic SNP
+          </button>
+          <button onclick="switchTab('triallelic')" id="tab-triallelic" class="flex-1 py-2 px-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="gantt-chart-square" class="w-4 h-4"></i> Triallelic Locus
+          </button>
+          <button onclick="switchTab('parser')" id="tab-parser" class="flex-1 py-2 px-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Fast Parser
+          </button>
+        </div>
+
+        <!-- Presets Selection -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-400"></i> Select Case Study / Preset
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="applyPreset('neutral')" class="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-brand-500/40 transition-all">
+              <div class="text-xs font-bold text-slate-200">Neutral SNP (MCM6)</div>
+              <p class="text-[10px] text-slate-400 line-clamp-1">In perfect HW Equilibrium</p>
+            </button>
+            <button onclick="applyPreset('selection')" class="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-brand-500/40 transition-all">
+              <div class="text-xs font-bold text-slate-200">HBB (Sickle Cell)</div>
+              <p class="text-[10px] text-slate-400 line-clamp-1">Balancing Selection pressure</p>
+            </button>
+            <button onclick="applyPreset('substructure')" class="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-brand-500/40 transition-all">
+              <div class="text-xs font-bold text-slate-200">Wahlund Effect</div>
+              <p class="text-[10px] text-slate-400 line-clamp-1">Excess Homozygotes (Isolated)</p>
+            </button>
+            <button onclick="applyPreset('error')" class="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-brand-500/40 transition-all">
+              <div class="text-xs font-bold text-slate-200">Genotyping Error</div>
+              <p class="text-[10px] text-slate-400 line-clamp-1">Massive heterozygote excess</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Input Box: Biallelic -->
+        <div id="input-container-biallelic" class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-4">
+          <div>
+            <h3 class="text-base font-bold text-white mb-1">Enter Observed Genotype Counts</h3>
+            <p class="text-xs text-slate-400">Specify counts for the primary hom, het, and secondary hom alleles.</p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-indigo-300 mb-1.5 uppercase tracking-wider">Homozygous Dominant (AA)</label>
+              <input type="number" id="count-AA" value="45" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl py-3 text-lg font-bold text-white outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-brand-300 mb-1.5 uppercase tracking-wider">Heterozygous (Aa)</label>
+              <input type="number" id="count-Aa" value="44" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl py-3 text-lg font-bold text-white outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-rose-300 mb-1.5 uppercase tracking-wider">Homozygous Recessive (aa)</label>
+              <input type="number" id="count-aa" value="11" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl py-3 text-lg font-bold text-white outline-none transition-all">
+            </div>
+          </div>
+
+          <!-- Locus Labels Config -->
+          <div class="grid grid-cols-2 gap-3 mt-1 pt-3 border-t border-slate-800/60">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Allele 1 Name (Major)</label>
+              <input type="text" id="allele-1-name" value="A" oninput="runCalculations()" class="w-full text-xs bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg px-2.5 py-1.5 font-bold text-slate-200 outline-none">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Allele 2 Name (Minor)</label>
+              <input type="text" id="allele-2-name" value="a" oninput="runCalculations()" class="w-full text-xs bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg px-2.5 py-1.5 font-bold text-slate-200 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Box: Triallelic -->
+        <div id="input-container-triallelic" class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-4 hidden">
+          <div>
+            <h3 class="text-base font-bold text-white mb-1">Triallelic SNP Counts</h3>
+            <p class="text-xs text-slate-400">A locus with three distinct alleles (A₁, A₂, A₃), yielding 6 possible genotypes.</p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10.5px] font-bold text-slate-300 mb-1">A₁A₁ (Homozygous)</label>
+              <input type="number" id="count-11" value="30" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+            <div>
+              <label class="block text-[10.5px] font-bold text-slate-300 mb-1">A₂A₂ (Homozygous)</label>
+              <input type="number" id="count-22" value="25" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+            <div>
+              <label class="block text-[10.5px] font-bold text-slate-300 mb-1">A₃A₃ (Homozygous)</label>
+              <input type="number" id="count-33" value="10" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10.5px] font-bold text-brand-300 mb-1">A₁A₂ (Hetero)</label>
+              <input type="number" id="count-12" value="20" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+            <div>
+              <label class="block text-[10.5px] font-bold text-brand-300 mb-1">A₁A₃ (Hetero)</label>
+              <input type="number" id="count-13" value="10" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+            <div>
+              <label class="block text-[10.5px] font-bold text-brand-300 mb-1">A₂A₃ (Hetero)</label>
+              <input type="number" id="count-23" value="5" min="0" oninput="runCalculations()" class="w-full text-center bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl py-2 font-bold text-white outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Box: Sequence & Genotype Parser -->
+        <div id="input-container-parser" class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-4 hidden">
+          <div>
+            <h3 class="text-base font-bold text-white mb-1">Paste Sequences / Genotypes</h3>
+            <p class="text-xs text-slate-400">Accepts Raw alleles (e.g., ATCTTT), comma/space separated genotypes (e.g. AG, GG, AA, AG), or multi-line tabular lists.</p>
+          </div>
+
+          <div class="relative">
+            <textarea id="raw-sequence-input" rows="5" placeholder="Example:&#10;A/A, A/G, A/G, G/G, A/A, A/G, A/G, G/G, G/G, A/G" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl p-3 text-xs font-mono text-indigo-200 outline-none resize-none"></textarea>
+            <button onclick="parseAndInjectData()" class="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg text-xs bg-brand-600 hover:bg-brand-500 font-semibold text-white transition-all shadow">
+              Parse & Load
+            </button>
+          </div>
+          
+          <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80">
+            <h4 class="text-xs font-bold text-slate-300 mb-1">Supported formats:</h4>
+            <ul class="text-[10px] text-slate-400 space-y-1 list-disc list-inside">
+              <li>Individual alleles string: <code class="text-brand-300">A A A B A B B B A A</code></li>
+              <li>Slashed genotypes: <code class="text-brand-300">C/C, C/T, T/T, C/T</code></li>
+              <li>Two-letter pairs: <code class="text-brand-300">AA AG AG GG GG AA</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Mini Helper Information -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-4">
+          <div class="flex items-start gap-3">
+            <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg">
+              <i data-lucide="info" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white mb-0.5">Statistical Framework</h4>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                We calculate Hardy-Weinberg expected frequencies utilizing the binomial expansion $p^2 + 2pq + q^2 = 1$. The Pearson Chi-Squared test goodness-of-fit evaluates deviation with 1 degree of freedom (biallelic).
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Panel: Diagnostics & Outputs (7 cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+        
+        <!-- Metrics Panel (Total, Allele & Genotype Frequencies) -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-md font-bold text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-400"></i> Calculated Population Frequencies
+            </h2>
+            <span class="text-xs font-mono text-slate-400">N = <span id="metric-N" class="font-bold text-white">100</span> individuals</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            <!-- Allele P -->
+            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl relative overflow-hidden group">
+              <div class="absolute top-0 right-0 h-1.5 w-1/2 bg-indigo-500"></div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Allele <span class="lbl-allele1">A</span> (p)</div>
+              <div id="stat-p" class="text-2xl font-black text-white mono">0.6700</div>
+              <div id="stat-p-pct" class="text-[10px] text-indigo-400 mt-0.5 font-bold">67.0%</div>
+            </div>
+            <!-- Allele Q -->
+            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl relative overflow-hidden group">
+              <div class="absolute top-0 right-0 h-1.5 w-1/2 bg-rose-500"></div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Allele <span class="lbl-allele2">a</span> (q)</div>
+              <div id="stat-q" class="text-2xl font-black text-white mono">0.3300</div>
+              <div id="stat-q-pct" class="text-[10px] text-rose-400 mt-0.5 font-bold">33.0%</div>
+            </div>
+            <!-- Heterozygosity Obs -->
+            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl relative overflow-hidden group">
+              <div class="absolute top-0 right-0 h-1.5 w-1/2 bg-emerald-500"></div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Obs. Het (Ho)</div>
+              <div id="stat-ho" class="text-2xl font-black text-white mono">0.4400</div>
+              <div id="stat-ho-diff" class="text-[10px] text-slate-400 mt-0.5">Exp: <span id="stat-he-mini" class="font-bold">0.442</span></div>
+            </div>
+            <!-- Inbreeding Coefficient -->
+            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl relative overflow-hidden group">
+              <div class="absolute top-0 right-0 h-1.5 w-1/2 bg-brand-500"></div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Inbreeding (F)</div>
+              <div id="stat-f" class="text-2xl font-black text-white mono">0.0050</div>
+              <div id="stat-f-desc" class="text-[10px] text-brand-400 mt-0.5 font-bold">Panmictic</div>
+            </div>
+          </div>
+
+          <!-- Genotypic Comparison Bar Plot -->
+          <div class="mb-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Observed vs Expected Genotype Distribution</h4>
+            <div id="chart-bars-container" class="space-y-3">
+              <!-- Dynamically rendered custom responsive SVG bar graphs -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Statistics & Equilibrium (HWE) -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          
+          <!-- Chi-Square Analysis (7 cols) -->
+          <div class="md:col-span-7 bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                <i data-lucide="scale" class="w-4 h-4 text-amber-400"></i> Goodness-of-Fit (HWE) Test
+              </h3>
+              
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 mb-4">
+                <div class="grid grid-cols-2 gap-3 divide-x divide-slate-800">
+                  <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase">Chi-Square ($\chi^2$)</span>
+                    <span id="stat-chi2" class="text-xl font-bold text-white mono">0.0452</span>
+                  </div>
+                  <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase">P-Value</span>
+                    <span id="stat-pvalue" class="text-xl font-bold text-white mono">0.8316</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HWE Verdict Banner -->
+            <div id="hwe-verdict-card" class="p-4 rounded-xl border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+              <div id="hwe-verdict-icon" class="p-2 bg-emerald-500/20 rounded-lg">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 id="hwe-verdict-title" class="text-xs font-extrabold uppercase tracking-wider">HWE Compliant</h4>
+                <p id="hwe-verdict-body" class="text-[10.5px] leading-relaxed text-slate-300">
+                  No statistical deviation detected ($P \ge 0.05$). The observed frequencies correspond perfectly to genetic equilibrium.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- De Finetti Parabola Plot (5 cols) -->
+          <div class="md:col-span-5 bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col items-center justify-between">
+            <div class="w-full text-center">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1">Equilibrium Parabola</h3>
+              <p class="text-[10px] text-slate-500">Live coordinates of major allele ($p$) vs Obs Heterozygosity</p>
+            </div>
+            
+            <div class="relative w-full aspect-square max-w-[160px] my-3">
+              <!-- SVG De Finetti Curve -->
+              <svg id="definetti-svg" viewBox="0 0 100 100" class="w-full h-full transform scale-y-[-1] overflow-visible">
+                <!-- Background Axis -->
+                <line x1="0" y1="0" x2="100" y2="0" stroke="#334155" stroke-width="1.5" stroke-dasharray="2 2" />
+                <line x1="0" y1="0" x2="0" y2="100" stroke="#334155" stroke-width="1.5" stroke-dasharray="2 2" />
+                
+                <!-- Theoretical HW Heterozygosity Parabola Curve: H = 2p(1-p) -->
+                <path d="M 0,0 Q 50,100 100,0" fill="none" stroke="#6d28d9" stroke-width="2.5" />
+                
+                <!-- Center Balance line -->
+                <line x1="50" y1="0" x2="50" y2="50" stroke="#4c1d95" stroke-width="0.75" stroke-dasharray="1 3" />
+                
+                <!-- Target state dot -->
+                <circle id="definetti-dot" cx="50" cy="50" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="1" class="animate-pulse" />
+              </svg>
+              <!-- Absolute labels overlay -->
+              <span class="absolute bottom-[-16px] left-0 text-[9px] text-slate-500">p=0</span>
+              <span class="absolute bottom-[-16px] right-0 text-[9px] text-slate-500">p=1</span>
+              <span class="absolute top-0 right-[-10px] text-[9px] text-violet-400">Max Ho=0.5</span>
+            </div>
+
+            <div class="text-[10px] text-center text-slate-400 w-full mt-2">
+              Marker Index (PIC): <span id="stat-pic" class="font-bold text-white">0.343</span>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- AI Assistant & Explanation Tab (Gemini 2.5 Flash) -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <div class="p-1.5 bg-brand-500/10 border border-brand-500/20 text-brand-400 rounded-lg">
+                <i data-lucide="bot" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">Gemini 2.5 Population Genetics Agent</h3>
+                <p class="text-[10px] text-slate-400">Submit calculated metrics to receive deep medical, quality control, or evolutionary findings.</p>
+              </div>
+            </div>
+            
+            <button onclick="generateAiInsights()" id="btn-ai-generate" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold transition-all shadow-lg shadow-brand-950/40 border border-brand-500/20">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Calculate AI Insights
+            </button>
+          </div>
+
+          <!-- Prompt Customizer -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+            <button onclick="selectAiMode('evolutionary')" id="mode-evolutionary" class="p-2 rounded-lg text-xs font-semibold text-center border bg-brand-950/20 border-brand-800/40 text-brand-300">
+              Evolutionary Interpretation
+            </button>
+            <button onclick="selectAiMode('qc')" id="mode-qc" class="p-2 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-900/40 text-slate-400">
+              QC & Genotyping Error Flags
+            </button>
+            <button onclick="selectAiMode('association')" id="mode-association" class="p-2 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-900/40 text-slate-400">
+              Medical & Relative Risk
+            </button>
+          </div>
+
+          <!-- AI Report Container -->
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 min-h-[140px] relative">
+            <!-- Loading Backdrop -->
+            <div id="ai-loading" class="absolute inset-0 bg-slate-950/90 rounded-xl flex flex-col items-center justify-center hidden">
+              <div class="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin mb-2"></div>
+              <p class="text-xs font-bold text-brand-300">Consulting Gemini 2.5 Flash...</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Calculating evolutionary forces and statistical error rates</p>
+            </div>
+
+            <!-- Initial state -->
+            <div id="ai-initial-state" class="flex flex-col items-center justify-center text-center p-6 py-8">
+              <i data-lucide="brain-circuit" class="w-8 h-8 text-slate-600 mb-2"></i>
+              <h4 class="text-xs font-bold text-slate-300">No report generated yet</h4>
+              <p class="text-[10px] text-slate-500 max-w-sm mt-1">
+                Configure your API key (if needed), input your counts, then select an analysis mode above to produce an AI-guided biological report.
+              </p>
+            </div>
+
+            <!-- AI Output content -->
+            <div id="ai-output" class="hidden">
+              <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800/40">
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-brand-400" id="ai-report-badge">Evolutionary Analysis</span>
+                <button onclick="copyAiOutput()" class="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors" title="Copy to clipboard">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              <div id="ai-text-content" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap max-h-[300px] overflow-y-auto pr-2">
+                <!-- Response gets rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-brand-950/40 bg-[#090514] px-4 py-4 text-center">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400">
+        <p>&copy; Atif Amin Baig, 2026, Applied College, University of Tabuk, Tabuk, Saudi Arabia</p>
+        <p class="flex items-center gap-1 text-slate-500">
+          Powered by Gemini 2.5 Flash <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        </p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- API Key Setup Modal -->
+  <div id="api-key-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden px-4">
+    <div class="bg-panel border border-brand-800/40 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+      <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-200 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2.5 bg-brand-500/10 border border-brand-500/20 text-brand-400 rounded-xl">
+          <i data-lucide="key-round" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Setup Gemini Gemini API Key</h3>
+          <p class="text-xs text-slate-400">Connect to your personal Google AI endpoint</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Enter Gemini API Key</label>
+          <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2.5 text-xs font-mono text-brand-200 outline-none">
+          <p class="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+            Your key is saved locally in memory. Leave empty to use runtime environment credentials (if available).
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2.5 pt-2">
+          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl text-xs bg-slate-800/80 hover:bg-slate-800 text-slate-300 font-bold transition-all">
+            Cancel
+          </button>
+          <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl text-xs bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all">
+            Save Key
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Notification Portal -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- JavaScript Logics -->
+  <script>
+    // App Constants & State variables
+    let currentTab = 'biallelic';
+    let apiKey = '';
+    let selectedMode = 'evolutionary';
+    let computedData = {}; // Global state container for computed parameters
+
+    // Lucide Icons initialization
+    document.addEventListener("DOMContentLoaded", function() {
+      lucide.createIcons();
+      runCalculations();
+    });
+
+    // Theme control
+    let isDark = true;
+    function toggleTheme() {
+      isDark = !isDark;
+      const html = document.querySelector('html');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) {
+        html.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      } else {
+        html.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    }
+
+    // Modal Control
+    function openApiKeyModal() {
+      document.getElementById('api-key-modal').classList.remove('hidden');
+      document.getElementById('input-api-key').value = apiKey;
+    }
+    function closeApiKeyModal() {
+      document.getElementById('api-key-modal').classList.add('hidden');
+    }
+    function saveApiKey() {
+      apiKey = document.getElementById('input-api-key').value.trim();
+      const statusBadge = document.getElementById('apiStatusText');
+      if (apiKey) {
+        statusBadge.textContent = 'API Key Configured';
+        statusBadge.parentElement.classList.add('border-brand-500', 'text-brand-300');
+        showToast('Success', 'Gemini API key updated.', 'success');
+      } else {
+        statusBadge.textContent = 'Setup Gemini AI';
+        statusBadge.parentElement.classList.remove('border-brand-500', 'text-brand-300');
+        showToast('Info', 'API key cleared. Utilizing environment tokens if present.', 'info');
+      }
+      closeApiKeyModal();
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      currentTab = tabId;
+      ['biallelic', 'triallelic', 'parser'].forEach(t => {
+        const tabEl = document.getElementById(`tab-${t}`);
+        const containerEl = document.getElementById(`input-container-${t}`);
+        
+        if (t === tabId) {
+          tabEl.className = "flex-1 py-2 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 bg-brand-600 text-white shadow-lg shadow-brand-950/20";
+          containerEl.classList.remove('hidden');
+        } else {
+          tabEl.className = "flex-1 py-2 px-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all flex items-center justify-center gap-2";
+          containerEl.classList.add('hidden');
+        }
+      });
+      runCalculations();
+    }
+
+    // Case Study Presets Loader
+    const PRESETS = {
+      neutral: {
+        tab: 'biallelic',
+        counts: { AA: 49, Aa: 42, aa: 9 },
+        labels: { L1: "T", L2: "C" }
+      },
+      selection: {
+        tab: 'biallelic',
+        counts: { AA: 60, Aa: 38, aa: 2 },
+        labels: { L1: "A", L2: "S" }
+      },
+      substructure: {
+        tab: 'biallelic',
+        counts: { AA: 52, Aa: 16, aa: 32 },
+        labels: { L1: "M", L2: "N" }
+      },
+      error: {
+        tab: 'biallelic',
+        counts: { AA: 12, Aa: 78, aa: 10 },
+        labels: { L1: "G", L2: "C" }
+      }
+    };
+
+    // Core Genetics Math & Statistics Functions
+    function runCalculations() {
+      // Dynamic Locus label sync
+      const a1Name = document.getElementById('allele-1-name').value.trim() || 'A';
+      const a2Name = document.getElementById('allele-2-name').value.trim() || 'a';
+
+      document.querySelectorAll('.lbl-allele1').forEach(el => el.textContent = a1Name);
+      document.querySelectorAll('.lbl-allele2').forEach(el => el.textContent = a2Name);
+
+      if (currentTab === 'biallelic' || currentTab === 'parser') {
+        calculateBiallelic(a1Name, a2Name);
+      } else if (currentTab === 'triallelic') {
+        calculateTriallelic();
+      }
+    }
+
+    function calculateBiallelic(a1Name, a2Name) {
+      const AA = Math.max(0, parseInt(document.getElementById('count-AA').value) || 0);
+      const Aa = Math.max(0, parseInt(document.getElementById('count-Aa').value) || 0);
+      const aa = Math.max(0, parseInt(document.getElementById('count-aa').value) || 0);
+
+      const N = AA + Aa + aa;
+      if (N === 0) return;
+
+      // Allele frequencies
+      const p = (2 * AA + Aa) / (2 * N);
+      const q = 1 - p;
+
+      // Observed genotype frequencies
+      const f_AA = AA / N;
+      const f_Aa = Aa / N;
+      const f_aa = aa / N;
+
+      // Expected genotype counts
+      const exp_AA = (p * p) * N;
+      const exp_Aa = (2 * p * q) * N;
+      const exp_aa = (q * q) * N;
+
+      // Expected genotype frequencies
+      const exp_f_AA = p * p;
+      const exp_f_Aa = 2 * p * q;
+      const exp_f_aa = q * q;
+
+      // Chi-Square Goodness-of-Fit test
+      let chi2 = 0;
+      if (exp_AA > 0) chi2 += Math.pow(AA - exp_AA, 2) / exp_AA;
+      if (exp_Aa > 0) chi2 += Math.pow(Aa - exp_Aa, 2) / exp_Aa;
+      if (exp_aa > 0) chi2 += Math.pow(aa - exp_aa, 2) / exp_aa;
+
+      // p-value calculation for df=1 (Wilson-Hilferty and error function approximation)
+      const pValue = computeChiSquarePValue(chi2, 1);
+
+      // Inbreeding coefficient (F)
+      let F = 0;
+      const expectedHet = 2 * p * q;
+      if (expectedHet > 0) {
+        F = (expectedHet - f_Aa) / expectedHet;
+      }
+
+      // PIC Calculation for Biallelic marker
+      // PIC = 1 - (p^2 + q^2) - 2 * p^2 * q^2
+      const PIC = 1 - (p*p + q*q) - (2 * p*p * q*q);
+
+      // Save global state data for Gemini model reporting
+      computedData = {
+        type: 'biallelic',
+        majorAllele: a1Name,
+        minorAllele: a2Name,
+        observed: { AA, Aa, aa },
+        expected: { AA: exp_AA, Aa: exp_Aa, aa: exp_aa },
+        frequencies: { p, q, f_AA, f_Aa, f_aa, exp_f_AA, exp_f_Aa, exp_f_aa },
+        chi2,
+        pValue,
+        inbreeding: F,
+        PIC,
+        total: N
+      };
+
+      // Push stats to UI
+      document.getElementById('metric-N').textContent = N;
+      document.getElementById('stat-p').textContent = p.toFixed(4);
+      document.getElementById('stat-p-pct').textContent = `${(p * 100).toFixed(1)}%`;
+      document.getElementById('stat-q').textContent = q.toFixed(4);
+      document.getElementById('stat-q-pct').textContent = `${(q * 100).toFixed(1)}%`;
+      document.getElementById('stat-ho').textContent = f_Aa.toFixed(4);
+      document.getElementById('stat-he-mini').textContent = expectedHet.toFixed(4);
+      document.getElementById('stat-f').textContent = F.toFixed(4);
+      
+      // Inbreeding description
+      const fDesc = document.getElementById('stat-f-desc');
+      if (F > 0.05) { FDescText = 'Inbreeding Excess'; fDesc.className = "text-[10px] text-rose-400 mt-0.5 font-bold"; }
+      else if (F < -0.05) { FDescText = 'Outbreeding Excess'; fDesc.className = "text-[10px] text-emerald-400 mt-0.5 font-bold"; }
+      else { FDescText = 'Panmictic'; fDesc.className = "text-[10px] text-brand-400 mt-0.5 font-bold"; }
+      fDesc.textContent = FDescText;
+
+      document.getElementById('stat-chi2').textContent = chi2.toFixed(4);
+      document.getElementById('stat-pvalue').textContent = pValue.toFixed(4);
+      document.getElementById('stat-pic').textContent = PIC.toFixed(4);
+
+      // Update HWE compliance alert banners
+      const verdictCard = document.getElementById('hwe-verdict-card');
+      const verdictTitle = document.getElementById('hwe-verdict-title');
+      const verdictBody = document.getElementById('hwe-verdict-body');
+      const verdictIcon = document.getElementById('hwe-verdict-icon');
+
+      if (pValue < 0.05) {
+        verdictCard.className = "p-4 rounded-xl border flex items-center gap-3 bg-rose-500/10 border-rose-500/20 text-rose-400";
+        verdictTitle.textContent = "Significant HWE Deviation";
+        verdictBody.textContent = `High statistical deviation detected (P = ${pValue.toFixed(4)}). The population violates standard panmictic constraints.`;
+        verdictIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+      } else {
+        verdictCard.className = "p-4 rounded-xl border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+        verdictTitle.textContent = "HWE Compliant";
+        verdictBody.textContent = `No statistical deviation detected (P = ${pValue.toFixed(4)}). Genotype counts align with population equilibrium.`;
+        verdictIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
+      }
+      lucide.createIcons();
+
+      // Update Bar Charts
+      renderGenotypeBarCharts([
+        { label: `${a1Name}${a1Name}`, obs: AA, exp: exp_AA },
+        { label: `${a1Name}${a2Name}`, obs: Aa, exp: exp_Aa },
+        { label: `${a2Name}${a2Name}`, obs: aa, exp: exp_aa },
+      ]);
+
+      // Update De Finetti SVG state marker dot
+      updateDeFinettiParabola(p, f_Aa);
+    }
+
+    function calculateTriallelic() {
+      const n11 = Math.max(0, parseInt(document.getElementById('count-11').value) || 0);
+      const n22 = Math.max(0, parseInt(document.getElementById('count-22').value) || 0);
+      const n33 = Math.max(0, parseInt(document.getElementById('count-33').value) || 0);
+      const n12 = Math.max(0, parseInt(document.getElementById('count-12').value) || 0);
+      const n13 = Math.max(0, parseInt(document.getElementById('count-13').value) || 0);
+      const n23 = Math.max(0, parseInt(document.getElementById('count-23').value) || 0);
+
+      const N = n11 + n22 + n33 + n12 + n13 + n23;
+      if (N === 0) return;
+
+      // Allele frequencies (3 alleles)
+      const p1 = (2 * n11 + n12 + n13) / (2 * N);
+      const p2 = (2 * n22 + n12 + n23) / (2 * N);
+      const p3 = (2 * n33 + n13 + n23) / (2 * N);
+
+      // Expected genotype counts under Hardy Weinberg multi-allelic:
+      // (p1 + p2 + p3)^2
+      const exp_11 = (p1 * p1) * N;
+      const exp_22 = (p2 * p2) * N;
+      const exp_33 = (p3 * p3) * N;
+      const exp_12 = (2 * p1 * p2) * N;
+      const exp_13 = (2 * p1 * p3) * N;
+      const exp_23 = (2 * p2 * p3) * N;
+
+      // Observed heterozygosity
+      const obs_het = (n12 + n13 + n23) / N;
+      // Expected heterozygosity
+      const exp_het = 1 - (p1*p1 + p2*p2 + p3*p3);
+
+      // Chi-Square statistic
+      let chi2 = 0;
+      if (exp_11 > 0) chi2 += Math.pow(n11 - exp_11, 2) / exp_11;
+      if (exp_22 > 0) chi2 += Math.pow(n22 - exp_22, 2) / exp_22;
+      if (exp_33 > 0) chi2 += Math.pow(n33 - exp_33, 2) / exp_33;
+      if (exp_12 > 0) chi2 += Math.pow(n12 - exp_12, 2) / exp_12;
+      if (exp_13 > 0) chi2 += Math.pow(n13 - exp_13, 2) / exp_13;
+      if (exp_23 > 0) chi2 += Math.pow(n23 - exp_23, 2) / exp_23;
+
+      // Degrees of Freedom: df = 6 genotypes - 3 alleles = 3
+      const pValue = computeChiSquarePValue(chi2, 3);
+
+      // Inbreeding coefficient (F)
+      let F = 0;
+      if (exp_het > 0) {
+        F = (exp_het - obs_het) / exp_het;
+      }
+
+      // PIC Calculation for multi-allelic:
+      // PIC = 1 - sum(p_i^2) - sum_i(sum_j(2 * p_i^2 * p_j^2))
+      let sumSq = p1*p1 + p2*p2 + p3*p3;
+      let sumProducts = 2 * (p1*p1 * p2*p2 + p1*p1 * p3*p3 + p2*p2 * p3*p3);
+      const PIC = 1 - sumSq - sumProducts;
+
+      // Save global state data for model reports
+      computedData = {
+        type: 'triallelic',
+        alleles: ['A1', 'A2', 'A3'],
+        observed: { n11, n22, n33, n12, n13, n23 },
+        expected: { n11: exp_11, n22: exp_22, n33: exp_33, n12: exp_12, n13: exp_13, n23: exp_23 },
+        frequencies: { p1, p2, p3, obs_het, exp_het },
+        chi2,
+        pValue,
+        inbreeding: F,
+        PIC,
+        total: N
+      };
+
+      // Push stats to UI
+      document.getElementById('metric-N').textContent = N;
+      document.getElementById('stat-p').textContent = p1.toFixed(4);
+      document.getElementById('stat-p-pct').textContent = `p1: ${(p1 * 100).toFixed(1)}%`;
+      document.getElementById('stat-q').textContent = p2.toFixed(4);
+      document.getElementById('stat-q-pct').textContent = `p2: ${(p2 * 100).toFixed(1)}%`;
+      document.getElementById('stat-ho').textContent = obs_het.toFixed(4);
+      document.getElementById('stat-he-mini').textContent = exp_het.toFixed(4);
+      document.getElementById('stat-f').textContent = F.toFixed(4);
+      
+      const fDesc = document.getElementById('stat-f-desc');
+      if (F > 0.05) { FDescText = 'Inbreeding'; fDesc.className = "text-[10px] text-rose-400 mt-0.5 font-bold"; }
+      else if (F < -0.05) { FDescText = 'Outbreeding'; fDesc.className = "text-[10px] text-emerald-400 mt-0.5 font-bold"; }
+      else { FDescText = 'Panmictic'; fDesc.className = "text-[10px] text-brand-400 mt-0.5 font-bold"; }
+      fDesc.textContent = FDescText;
+
+      document.getElementById('stat-chi2').textContent = chi2.toFixed(4);
+      document.getElementById('stat-pvalue').textContent = pValue.toFixed(4);
+      document.getElementById('stat-pic').textContent = PIC.toFixed(4);
+
+      // Verdict Banner
+      const verdictCard = document.getElementById('hwe-verdict-card');
+      const verdictTitle = document.getElementById('hwe-verdict-title');
+      const verdictBody = document.getElementById('hwe-verdict-body');
+      const verdictIcon = document.getElementById('hwe-verdict-icon');
+
+      if (pValue < 0.05) {
+        verdictCard.className = "p-4 rounded-xl border flex items-center gap-3 bg-rose-500/10 border-rose-500/20 text-rose-400";
+        verdictTitle.textContent = "Significant HWE Deviation";
+        verdictBody.textContent = `High statistical deviation detected (P = ${pValue.toFixed(4)}) with 3 Degrees of Freedom.`;
+        verdictIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+      } else {
+        verdictCard.className = "p-4 rounded-xl border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+        verdictTitle.textContent = "HWE Compliant";
+        verdictBody.textContent = `No statistical deviation detected (P = ${pValue.toFixed(4)}) with 3 Degrees of Freedom.`;
+        verdictIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
+      }
+      lucide.createIcons();
+
+      // Update Bar Charts
+      renderGenotypeBarCharts([
+        { label: `A₁A₁`, obs: n11, exp: exp_11 },
+        { label: `A₂A₂`, obs: n22, exp: exp_22 },
+        { label: `A₃A₃`, obs: n33, exp: exp_33 },
+        { label: `A₁A₂`, obs: n12, exp: exp_12 },
+        { label: `A₁A₃`, obs: n13, exp: exp_13 },
+        { label: `A₂A₃`, obs: n23, exp: exp_23 },
+      ]);
+
+      // Simple De Finetti curve update (using dominant allele relative to sum of others)
+      updateDeFinettiParabola(p1, n12/N + n13/N);
+    }
+
+    // Mathematical approximations for Chi-Square CDF
+    function computeChiSquarePValue(chi2, df) {
+      if (chi2 < 0 || df < 1) return 1.0;
+      
+      // For df=1 (Biallelic locus HWE test)
+      if (df === 1) {
+        let x = Math.sqrt(chi2);
+        return erfc(x / Math.sqrt(2));
+      }
+
+      // Wilson-Hilferty transformation is extremely accurate for general DF
+      let term1 = chi2 / df;
+      let term2 = 2 / (9 * df);
+      let z = (Math.pow(term1, 1/3) - (1 - term2)) / Math.sqrt(term2);
+      return erfc(z / Math.sqrt(2));
+    }
+
+    function erfc(x) {
+      if (x < 0) return 2 - erfc(-x);
+      // Chebyshev polynomial approximation of complementary error function
+      let t = 1.0 / (1.0 + 0.5 * Math.abs(x));
+      let ans = t * Math.exp(-x * x - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+      return ans;
+    }
+
+    // Dynamic SVG Bar Charts Generator
+    function renderGenotypeBarCharts(data) {
+      const container = document.getElementById('chart-bars-container');
+      container.innerHTML = '';
+
+      // Find max value to calibrate bar scales
+      const maxVal = Math.max(...data.flatMap(d => [d.obs, d.exp]));
+
+      data.forEach(item => {
+        const obsPct = maxVal > 0 ? (item.obs / maxVal) * 100 : 0;
+        const expPct = maxVal > 0 ? (item.exp / maxVal) * 100 : 0;
+
+        const row = document.createElement('div');
+        row.className = "flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs";
+        row.innerHTML = `
+          <div class="w-12 font-mono font-bold text-slate-300 text-left">${item.label}</div>
+          <div class="flex-grow w-full space-y-1">
+            <!-- Observed Bar -->
+            <div class="flex items-center gap-2">
+              <div class="flex-grow bg-slate-950 rounded h-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-600 to-indigo-500 h-full rounded" style="width: ${obsPct}%"></div>
+              </div>
+              <span class="w-14 text-right text-slate-300 font-mono text-[10px]">Obs: <strong class="text-white">${item.obs.toFixed(0)}</strong></span>
+            </div>
+            <!-- Expected Bar -->
+            <div class="flex items-center gap-2">
+              <div class="flex-grow bg-slate-950 rounded h-3 overflow-hidden">
+                <div class="bg-slate-800 border-r border-slate-600 h-full rounded" style="width: ${expPct}%"></div>
+              </div>
+              <span class="w-14 text-right text-slate-400 font-mono text-[10px]">Exp: <strong>${item.exp.toFixed(1)}</strong></span>
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Live update of De Finetti Plot SVG Coordinates
+    function updateDeFinettiParabola(p, observedHet) {
+      const dot = document.getElementById('definetti-dot');
+      if (!dot) return;
+
+      // SVG dimensions are 100x100
+      // p-axis is X from 0 to 100
+      // het-axis is Y from 0 to 100 (Since max theoretical het frequency is 0.5, we scale 100% of plot area to 0.5 max)
+      const targetX = p * 100;
+      const targetY = (observedHet / 0.5) * 100;
+
+      // Bound check
+      const boundedX = Math.max(0, Math.min(100, targetX));
+      const boundedY = Math.max(0, Math.min(100, targetY));
+
+      dot.setAttribute('cx', boundedX);
+      dot.setAttribute('cy', boundedY);
+    }
+
+    // AI Selection & Callout System
+    function selectAiMode(modeId) {
+      selectedMode = modeId;
+      ['evolutionary', 'qc', 'association'].forEach(m => {
+        const btn = document.getElementById(`mode-${m}`);
+        if (m === modeId) {
+          btn.className = "p-2 rounded-lg text-xs font-semibold text-center border bg-brand-950/20 border-brand-800/40 text-brand-300";
+        } else {
+          btn.className = "p-2 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-900/40 text-slate-400";
+        }
+      });
+    }
+
+    // Call Gemini 2.5 Flash API with exponential backoff retry logic
+    async function callGemini(payload) {
+      const actualKey = apiKey || ""; // Automatically handles local storage configuration or blank
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${actualKey}`;
+      
+      let delay = 1000;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          if (response.ok) {
+            return await response.json();
+          }
+          if (response.status === 429) {
+            // Trigger Exponential Backoff
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+            continue;
+          }
+          throw new Error(`API returned error code ${response.status}`);
+        } catch (error) {
+          if (attempt === 4) throw error;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
+        }
+      }
+      throw new Error("API call failed after maximum retries.");
+    }
+
+    async function generateAiInsights() {
+      const loader = document.getElementById('ai-loading');
+      const initialState = document.getElementById('ai-initial-state');
+      const aiOutput = document.getElementById('ai-output');
+      const aiText = document.getElementById('ai-text-content');
+      const badge = document.getElementById('ai-report-badge');
+
+      loader.classList.remove('hidden');
+      initialState.classList.add('hidden');
+      aiOutput.classList.add('hidden');
+
+      // Setup dynamic Prompt payload context depending on calculated metrics
+      let systemPrompt = "You are an expert bioinformatician and clinical population geneticist specializing in Single Nucleotide Polymorphism (SNP) analysis and evolutionary biology.";
+      
+      let userQuery = `Produce an expert genomic interpretation report based on the following computed dataset:\n\n`;
+      userQuery += `Variant Type: ${computedData.type.toUpperCase()}\n`;
+      userQuery += `Total Sample Size (N): ${computedData.total}\n`;
+      
+      if (computedData.type === 'biallelic') {
+        userQuery += `Alleles: ${computedData.majorAllele} (p = ${computedData.frequencies.p.toFixed(4)}), ${computedData.minorAllele} (q = ${computedData.frequencies.q.toFixed(4)})\n`;
+        userQuery += `Observed Genotypes: Hom Major: ${computedData.observed.AA}, Het: ${computedData.observed.Aa}, Hom Minor: ${computedData.observed.aa}\n`;
+        userQuery += `Expected Genotypes (HWE): Hom Major: ${computedData.expected.AA.toFixed(2)}, Het: ${computedData.expected.Aa.toFixed(2)}, Hom Minor: ${computedData.expected.aa.toFixed(2)}\n`;
+      } else {
+        userQuery += `Allele Frequencies: p1: ${computedData.frequencies.p1.toFixed(4)}, p2: ${computedData.frequencies.p2.toFixed(4)}, p3: ${computedData.frequencies.p3.toFixed(4)}\n`;
+        userQuery += `Observed Het (Ho): ${computedData.frequencies.obs_het.toFixed(4)} vs Expected Het (He): ${computedData.frequencies.exp_het.toFixed(4)}\n`;
+      }
+
+      userQuery += `Chi-Square Goodness-of-Fit Stat: ${computedData.chi2.toFixed(4)}\n`;
+      userQuery += `HWE Departure P-Value: ${computedData.pValue.toFixed(4)}\n`;
+      userQuery += `Inbreeding Coefficient (F-stat): ${computedData.inbreeding.toFixed(4)}\n`;
+      userQuery += `Polymorphic Information Content (PIC): ${computedData.PIC.toFixed(4)}\n\n`;
+
+      if (selectedMode === 'evolutionary') {
+        badge.textContent = "Evolutionary Analysis";
+        userQuery += "Analyze the evolutionary forces acting on this locus. Address natural selection (e.g. heterozygote advantage/disadvantage, directional selection), genetic drift, population bottlenecks, non-random mating/assortative mating, and the Wahlund effect. Be highly scientific and thorough.";
+      } else if (selectedMode === 'qc') {
+        badge.textContent = "Quality Control Report";
+        userQuery += "Analyze if the observed deviation (or lack thereof) suggests potential quality control or genotyping issues, such as allele dropout, primer design malfunction, amplification bias, sample contamination, or somatic variations. Outline recommendations for bioinformatics pipeline adjustments.";
+      } else if (selectedMode === 'association') {
+        badge.textContent = "Association & Medical Significance";
+        userQuery += "Analyze the clinical or traits association implications of this variant. Explain how deviations from HWE can lead to false positives in Genome-Wide Association Studies (GWAS). Discuss the Marker Information Index (PIC) and how useful this locus is as a genetic marker.";
+      }
+
+      const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+      };
+
+      try {
+        const result = await callGemini(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (text) {
+          aiText.textContent = text;
+          aiOutput.classList.remove('hidden');
+        } else {
+          throw new Error("Malformed response format received.");
+        }
+      } catch (err) {
+        showToast('Integration Error', 'Failed to communicate with AI endpoint. Please verify your internet connection or API Key.', 'error');
+        initialState.classList.remove('hidden');
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    function copyAiOutput() {
+      const text = document.getElementById('ai-text-content').textContent;
+      if (!text) return;
+
+      // Use recommended standard clipboard fallback API logic
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      showToast('Copied', 'AI Report copied to clipboard.', 'success');
+    }
+
+    // Portal Toast Notification Engine
+    function showToast(title, message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let borderCol = "border-slate-800 bg-slate-900";
+      let icon = "info";
+      let iconCol = "text-indigo-400";
+      if (type === 'success') {
+        borderCol = "border-emerald-500/20 bg-emerald-950/90 text-emerald-300";
+        icon = "check-circle";
+        iconCol = "text-emerald-400";
+      } else if (type === 'error') {
+        borderCol = "border-rose-500/20 bg-rose-950/90 text-rose-300";
+        icon = "alert-circle";
+        iconCol = "text-rose-400";
+      }
+
+      toast.className = `p-4 rounded-xl border ${borderCol} flex gap-3 shadow-lg transition-all duration-300 transform translate-y-2 pointer-events-auto`;
+      toast.innerHTML = `
+        <div class="${iconCol} mt-0.5">
+          <i data-lucide="${icon}" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white mb-0.5">${title}</h4>
+          <p class="text-[10px] leading-relaxed text-slate-300">${message}</p>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      // Simple animation slide-in trigger
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2');
+      }, 50);
+
+      // Dismissal Timer
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-1');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
