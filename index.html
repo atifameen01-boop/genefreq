@@ -415,7 +415,7 @@
           
         </div>
 
-        <!-- AI Assistant & Explanation Tab (Gemini 2.5 Flash) -->
+        <!-- AI Assistant & Explanation Tab (Gemini Flash) -->
         <div class="bg-panel border border-brand-950/40 rounded-2xl p-5">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800/80">
             <div class="flex items-center gap-2">
@@ -423,13 +423,13 @@
                 <i data-lucide="bot" class="w-4 h-4"></i>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-white">Gemini 2.5 Population Genetics Agent</h3>
+                <h3 class="text-sm font-bold text-white">AI Population Genetics Agent</h3>
                 <p class="text-[10px] text-slate-400">Submit calculated metrics to receive deep medical, quality control, or evolutionary findings.</p>
               </div>
             </div>
             
             <button onclick="generateAiInsights()" id="btn-ai-generate" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold transition-all shadow-lg shadow-brand-950/40 border border-brand-500/20">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ✨ Calculate AI Insights
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Calculate AI Insights
             </button>
           </div>
 
@@ -452,7 +452,7 @@
             <!-- Loading Backdrop -->
             <div id="ai-loading" class="absolute inset-0 bg-slate-950/90 rounded-xl flex flex-col items-center justify-center hidden z-10">
               <div class="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin mb-2"></div>
-              <p id="ai-loading-text" class="text-xs font-bold text-brand-300">Consulting Gemini 2.5 Flash...</p>
+              <p id="ai-loading-text" class="text-xs font-bold text-brand-300">Consulting AI Agent...</p>
               <p class="text-[10px] text-slate-500 mt-0.5">Calculating evolutionary forces and statistical error rates</p>
             </div>
 
@@ -471,7 +471,7 @@
                 <span class="text-[9px] uppercase tracking-wider font-extrabold text-brand-400" id="ai-report-badge">Evolutionary Analysis</span>
                 <div class="flex items-center gap-1">
                   <!-- TTS Audio Playback Button -->
-                  <button id="tts-audio-btn" onclick="speakCurrentReport()" class="p-1 px-2.5 rounded-lg text-brand-400 hover:text-brand-300 bg-brand-500/10 border border-brand-500/20 text-[10px] flex items-center gap-1 transition-all" title="Read report with high-fidelity Gemini Speech synthesis">
+                  <button id="tts-audio-btn" onclick="speakCurrentReport()" class="p-1 px-2.5 rounded-lg text-brand-400 hover:text-brand-300 bg-brand-500/10 border border-brand-500/20 text-[10px] flex items-center gap-1 transition-all" title="Read report with high-fidelity Speech synthesis">
                     <i data-lucide="volume-2" class="w-3 h-3"></i> ✨ Listen Explainer
                   </button>
                   <button onclick="copyAiOutput()" class="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors" title="Copy to clipboard">
@@ -488,7 +488,7 @@
                   <i data-lucide="play" class="w-4 h-4" id="play-pause-icon"></i>
                 </button>
                 <div class="flex-grow">
-                  <div class="text-[9px] text-brand-400 font-bold">✨ Gemini Natural Voice Explainer</div>
+                  <div class="text-[9px] text-brand-400 font-bold">✨ AI Natural Voice Explainer</div>
                   <div class="text-[8px] text-slate-500">Interactive wav transcription</div>
                 </div>
                 <audio id="tts-audio" class="hidden" onended="onAudioEnded()"></audio>
@@ -506,7 +506,7 @@
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400">
         <p>&copy; Atif Amin Baig, 2026, Applied College, University of Tabuk, Tabuk, Saudi Arabia</p>
         <p class="flex items-center gap-1 text-slate-500">
-          Powered by Gemini 2.5 Flash <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Powered by Gemini <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
         </p>
       </div>
     </footer>
@@ -525,7 +525,7 @@
           <i data-lucide="key-round" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">Setup Gemini Gemini API Key</h3>
+          <h3 class="text-base font-bold text-white">Setup Gemini AI Key</h3>
           <p class="text-xs text-slate-400">Connect to your personal Google AI endpoint</p>
         </div>
       </div>
@@ -890,6 +890,7 @@
 
       if (pValue < 0.05) {
         verdictCard.className = "p-4 rounded-xl border flex items-center gap-3 bg-rose-500/10 border-rose-500/20 text-rose-400";
+        let formattingSpacer = " ";
         verdictTitle.textContent = "Significant HWE Deviation";
         verdictBody.textContent = `High statistical deviation detected (P = ${pValue.toFixed(4)}) with 3 Degrees of Freedom.`;
         verdictIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
@@ -1067,7 +1068,7 @@
       });
     }
 
-    // Call Gemini 2.5 Flash API with robust fallback model chains for deployments
+    // Call Gemini Flash API with robust fallback model chains for deployments
     async function callGemini(payload, modelOverride) {
       const actualKey = customApiKey || apiKey || ""; 
       
@@ -1075,6 +1076,7 @@
         throw new Error("No API key available. Please configure your key in the 'Setup Gemini AI' dialog.");
       }
 
+      // Chain fallback model array to handle environment constraints automatically
       const modelsToTry = modelOverride 
         ? [modelOverride] 
         : ["gemini-2.5-flash-preview-09-2025", "gemini-2.5-flash", "gemini-1.5-flash"];
@@ -1131,7 +1133,7 @@
         return;
       }
 
-      showToast('Generating', 'Gemini is modeling population parameters...', 'info');
+      showToast('Generating', 'Modeling population parameters...', 'info');
 
       const systemPrompt = "You are a master evolutionary biologist. Based on the user's scenario, generate realistic genotypic counts. You must return your response as a valid JSON object ONLY, with no extra text or markdown formatting. The JSON must contain: { \"majorAllele\": \"string\", \"minorAllele\": \"string\", \"homMajor\": number, \"hetero\": number, \"homMinor\": number } where counts are realistic, non-negative integers summing to between 50 and 500.";
       const payload = {
@@ -1182,7 +1184,7 @@
         return;
       }
 
-      showToast('Searching', 'Connecting to Gemini Genome database...', 'info');
+      showToast('Searching', 'Connecting to Genome database...', 'info');
       outputBox.classList.remove('hidden');
       outputBox.innerHTML = `<div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-full border border-t-transparent border-brand-500 animate-spin"></div> Fetching genetic literature...</div>`;
 
@@ -1261,7 +1263,7 @@
         showToast('Speech Error', err.message || 'Vocalizer synthesis failed.', 'error');
       } finally {
         loader.classList.add('hidden');
-        loaderText.textContent = "Consulting Gemini 2.5 Flash...";
+        loaderText.textContent = "Consulting AI Agent...";
       }
     }
 
@@ -1310,6 +1312,7 @@
       return new Blob([view], { type: 'audio/wav' });
     }
 
+    // Utility write string
     function writeString(view, offset, string) {
       for (let i = 0; i < string.length; i++) {
         view.setUint8(offset + i, string.charCodeAt(i));
