@@ -1109,7 +1109,8 @@
       let lastError = null;
 
       for (const model of modelsToTry) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${actualKey}`;
+        // Safe key URI wrapping prevents malformed API parameters from injecting transcoder-breaking fields
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(actualKey.trim())}`;
         let delay = 1000;
         
         for (let attempt = 0; attempt < 3; attempt++) {
