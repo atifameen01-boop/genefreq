@@ -539,10 +539,13 @@
           </p>
         </div>
 
-        <div class="flex justify-end gap-2.5 pt-2">
+        <div class="flex flex-wrap justify-end gap-2 pt-2">
           <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl text-xs bg-slate-800/80 hover:bg-slate-800 text-slate-300 font-bold transition-all">
             Cancel
           </button>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs bg-slate-800 hover:bg-slate-700 text-brand-300 font-bold transition-all border border-brand-500/30">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Generate API Key
+          </a>
           <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl text-xs bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all">
             Save Key
           </button>
@@ -679,6 +682,7 @@
       }
     }
 
+    // Mathematical calculations for HWE & goodness-of-fit
     function calculateBiallelic(a1Name, a2Name) {
       const AA = Math.max(0, parseInt(document.getElementById('count-AA').value) || 0);
       const Aa = Math.max(0, parseInt(document.getElementById('count-Aa').value) || 0);
@@ -723,7 +727,6 @@
       }
 
       // PIC Calculation for Biallelic marker
-      // PIC = 1 - (p^2 + q^2) - 2 * p^2 * q^2
       const PIC = 1 - (p*p + q*q) - (2 * p*p * q*q);
 
       // Save global state data for Gemini model reporting
@@ -841,7 +844,6 @@
       }
 
       // PIC Calculation for multi-allelic:
-      // PIC = 1 - sum(p_i^2) - sum_i(sum_j(2 * p_i^2 * p_j^2))
       let sumSq = p1*p1 + p2*p2 + p3*p3;
       let sumProducts = 2 * (p1*p1 * p2*p2 + p1*p1 * p3*p3 + p2*p2 * p3*p3);
       const PIC = 1 - sumSq - sumProducts;
@@ -913,22 +915,6 @@
       updateDeFinettiParabola(p1, n12/N + n13/N);
     }
 
-    function applyPreset(presetKey) {
-      const p = PRESETS[presetKey];
-      if (!p) return;
-      
-      switchTab(p.tab);
-      if (p.tab === 'biallelic') {
-        document.getElementById('count-AA').value = p.counts.AA;
-        document.getElementById('count-Aa').value = p.counts.Aa;
-        document.getElementById('count-aa').value = p.counts.aa;
-        document.getElementById('allele-1-name').value = p.labels.L1;
-        document.getElementById('allele-2-name').value = p.labels.L2;
-      }
-      showToast('Loaded', `Case study preset '${presetKey.toUpperCase()}' applied.`, 'success');
-      runCalculations();
-    }
-
     // Sequence & Tabular Genotype Parser Engine
     function parseAndInjectData() {
       const input = document.getElementById('raw-sequence-input').value.trim();
@@ -953,7 +939,6 @@
       const isPairs = tokens[0].length === 2;
 
       if (isPairs) {
-        // Find set of distinct single letters to represent alleles
         const letters = [...new Set(tokens.join(''))];
         majorAllele = letters[0] || 'A';
         minorAllele = letters[1] || 'G';
@@ -964,7 +949,6 @@
           else if (tok === majorAllele + minorAllele || tok === minorAllele + majorAllele) Aa++;
         });
       } else {
-        // Individual token alleles (e.g., [A, A, G, G, A, G])
         const counts = {};
         tokens.forEach(tok => {
           counts[tok] = (counts[tok] || 0) + 1;
@@ -974,7 +958,6 @@
         majorAllele = sortedAlleles[0] || 'A';
         minorAllele = sortedAlleles[1] || 'a';
 
-        // Reconstruct genotypes under random pairing simulation
         const totalA = counts[majorAllele] || 0;
         const totala = counts[minorAllele] || 0;
         const totalN = totalA + totala;
@@ -988,7 +971,6 @@
         }
       }
 
-      // Load into Inputs
       document.getElementById('count-AA').value = AA;
       document.getElementById('count-Aa').value = Aa;
       document.getElementById('count-aa').value = aa;
@@ -1003,13 +985,11 @@
     function computeChiSquarePValue(chi2, df) {
       if (chi2 < 0 || df < 1) return 1.0;
       
-      // For df=1 (Biallelic locus HWE test)
       if (df === 1) {
         let x = Math.sqrt(chi2);
         return erfc(x / Math.sqrt(2));
       }
 
-      // Wilson-Hilferty transformation is extremely accurate for general DF
       let term1 = chi2 / df;
       let term2 = 2 / (9 * df);
       let z = (Math.pow(term1, 1/3) - (1 - term2)) / Math.sqrt(term2);
@@ -1018,7 +998,6 @@
 
     function erfc(x) {
       if (x < 0) return 2 - erfc(-x);
-      // Chebyshev polynomial approximation of complementary error function
       let t = 1.0 / (1.0 + 0.5 * Math.abs(x));
       let ans = t * Math.exp(-x * x - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
       return ans;
@@ -1029,7 +1008,6 @@
       const container = document.getElementById('chart-bars-container');
       container.innerHTML = '';
 
-      // Find max value to calibrate bar scales
       const maxVal = Math.max(...data.flatMap(d => [d.obs, d.exp]));
 
       data.forEach(item => {
@@ -1066,13 +1044,9 @@
       const dot = document.getElementById('definetti-dot');
       if (!dot) return;
 
-      // SVG dimensions are 100x100
-      // p-axis is X from 0 to 100
-      // het-axis is Y from 0 to 100 (Since max theoretical het frequency is 0.5, we scale 100% of plot area to 0.5 max)
       const targetX = p * 100;
       const targetY = (observedHet / 0.5) * 100;
 
-      // Bound check
       const boundedX = Math.max(0, Math.min(100, targetX));
       const boundedY = Math.max(0, Math.min(100, targetY));
 
@@ -1101,7 +1075,6 @@
         throw new Error("No API key available. Please configure your key in the 'Setup Gemini AI' dialog.");
       }
 
-      // Chain fallback model array to handle environment constraints automatically
       const modelsToTry = modelOverride 
         ? [modelOverride] 
         : ["gemini-2.5-flash-preview-09-2025", "gemini-2.5-flash", "gemini-1.5-flash"];
@@ -1109,7 +1082,6 @@
       let lastError = null;
 
       for (const model of modelsToTry) {
-        // Safe key URI wrapping prevents malformed API parameters from injecting transcoder-breaking fields
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(actualKey.trim())}`;
         let delay = 1000;
         
@@ -1128,10 +1100,9 @@
             const errData = await response.json().catch(() => ({}));
             const errMsg = errData.error?.message || "";
             
-            // If the model was not found or supported, try the next model in the chain instantly
             if (response.status === 404 || errMsg.includes("not found") || errMsg.includes("not supported")) {
               lastError = new Error(errMsg || `Model ${model} not found.`);
-              break; // Breaks attempt retry loop, moving to next model
+              break; 
             }
 
             if (response.status === 429) {
@@ -1187,7 +1158,6 @@
         const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
         const data = JSON.parse(text);
 
-        // Inject simulated parameters into the system
         switchTab('biallelic');
         document.getElementById('count-AA').value = data.homMajor;
         document.getElementById('count-Aa').value = data.hetero;
@@ -1248,7 +1218,6 @@
       loaderText.textContent = "Synthesizing Vocal Explainer...";
       loader.classList.remove('hidden');
 
-      // Prepare reading script summary
       const readingScript = `Summarizing the genetic metrics of your population: ` + reportText.substring(0, 400) + "...";
 
       const payload = {
@@ -1258,7 +1227,7 @@
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: {
-                voiceName: "Fenrir" // Rich voice
+                voiceName: "Fenrir" 
               }
             }
           }
@@ -1283,7 +1252,7 @@
           audioElement.src = audioUrl;
           
           document.getElementById('audio-player-container').classList.remove('hidden');
-          toggleAudio(); // Start playing
+          toggleAudio(); 
           showToast('Audio Ready', 'Press play on the controller to hear explainer.', 'success');
         } else {
           throw new Error("Speech synthesis did not return an audio stream.");
@@ -1310,7 +1279,6 @@
       lucide.createIcons();
     }
 
-    // Audio callbacks
     function onAudioEnded() {
       const icon = document.getElementById('play-pause-icon');
       icon.setAttribute('data-lucide', 'play');
@@ -1322,34 +1290,20 @@
       const buffer = new ArrayBuffer(44 + pcmData.length);
       const view = new DataView(buffer);
 
-      /* RIFF identifier */
       writeString(view, 0, 'RIFF');
-      /* file length */
       view.setUint32(4, 36 + pcmData.length, true);
-      /* RIFF type */
       writeString(view, 8, 'WAVE');
-      /* format chunk identifier */
       writeString(view, 12, 'fmt ');
-      /* format chunk length */
       view.setUint32(16, 16, true);
-      /* sample format (raw PCM = 1) */
       view.setUint16(20, 1, true);
-      /* channel count (mono) */
       view.setUint16(22, 1, true);
-      /* sample rate */
       view.setUint32(24, sampleRate, true);
-      /* byte rate (sampleRate * blockAlign) */
       view.setUint32(28, sampleRate * 2, true);
-      /* block align (channelCount * bytesPerSample) */
       view.setUint16(32, 2, true);
-      /* bits per sample */
       view.setUint16(34, 16, true);
-      /* data chunk identifier */
       writeString(view, 36, 'data');
-      /* data chunk length */
       view.setUint32(40, pcmData.length, true);
 
-      // Write PCM bytes
       const rawData = new Uint8Array(buffer, 44);
       rawData.set(pcmData);
 
@@ -1384,7 +1338,6 @@
       initialState.classList.add('hidden');
       aiOutput.classList.add('hidden');
 
-      // Setup dynamic Prompt payload context depending on calculated metrics
       let systemPrompt = "You are an expert bioinformatician and clinical population geneticist specializing in Single Nucleotide Polymorphism (SNP) analysis and evolutionary biology.";
       
       let userQuery = `Produce an expert genomic interpretation report based on the following computed dataset:\n\n`;
@@ -1443,7 +1396,6 @@
       const text = document.getElementById('ai-text-content').textContent;
       if (!text) return;
 
-      // Use recommended standard clipboard fallback API logic
       const el = document.createElement('textarea');
       el.value = text;
       document.body.appendChild(el);
@@ -1486,12 +1438,10 @@
       container.appendChild(toast);
       lucide.createIcons();
 
-      // Simple animation slide-in trigger
       setTimeout(() => {
         toast.classList.remove('translate-y-2');
       }, 50);
 
-      // Dismissal Timer
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-1');
         setTimeout(() => toast.remove(), 300);
