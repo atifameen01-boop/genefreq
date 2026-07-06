@@ -140,6 +140,22 @@
           </div>
         </div>
 
+        <!-- AI Population Scenario Simulator -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="wand-2" class="w-4 h-4 text-violet-400 animate-bounce"></i> ✨ AI Scenario Generator
+            </h3>
+            <p class="text-xs text-slate-400">Describe any evolutionary process to generate mock dataset values.</p>
+          </div>
+          <div class="relative">
+            <textarea id="ai-scenario-prompt" rows="2" placeholder="Example: A highly isolated mountain valley with severe inbreeding and extreme select sweep against G major allele..." class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl p-2.5 text-xs text-indigo-200 outline-none resize-none"></textarea>
+            <button onclick="generateScenarioPopulation()" class="w-full mt-2 py-2 rounded-xl text-xs bg-brand-600 hover:bg-brand-500 font-bold text-white transition-all shadow flex items-center justify-center gap-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ✨ Simulate Scenario
+            </button>
+          </div>
+        </div>
+
         <!-- Input Box: Biallelic -->
         <div id="input-container-biallelic" class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-4">
           <div>
@@ -246,7 +262,7 @@
             <div>
               <h4 class="text-xs font-bold text-white mb-0.5">Statistical Framework</h4>
               <p class="text-[11px] text-slate-400 leading-relaxed">
-                We calculate Hardy-Weinberg expected frequencies utilizing the binomial expansion $p^2 + 2pq + q^2 = 1$. The Pearson Chi-Squared test goodness-of-fit evaluates deviation with 1 degree of freedom (biallelic).
+                We calculate Hardy-Weinberg expected frequencies utilizing the binomial expansion p² + 2pq + q² = 1. The Pearson Chi-Squared test goodness-of-fit evaluates deviation with 1 degree of freedom (biallelic).
               </p>
             </div>
           </div>
@@ -306,6 +322,25 @@
           </div>
         </div>
 
+        <!-- AI SNP and Gene Biological Lookup Tool -->
+        <div class="bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="dna" class="text-emerald-400 animate-pulse"></i> ✨ AI Genotype & Trait Encyclopedia
+            </h3>
+            <p class="text-xs text-slate-400">Query clinical characteristics, global frequencies, and association risk of specific variants.</p>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="ai-lookup-input" placeholder="Enter SNP ID or Gene (e.g. rs1801133 or MTHFR)..." class="flex-grow bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none">
+            <button onclick="lookupGeneOrSnp()" class="px-4 py-2 rounded-xl text-xs bg-emerald-600 hover:bg-emerald-500 font-bold text-white transition-all shadow-md flex items-center gap-1.5">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i> ✨ Lookup
+            </button>
+          </div>
+          <div id="ai-lookup-box" class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl hidden text-xs leading-relaxed text-slate-300 max-h-[160px] overflow-y-auto">
+            <!-- Dynamic Encyclopedia results here -->
+          </div>
+        </div>
+
         <!-- Advanced Statistics & Equilibrium (HWE) -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
           
@@ -319,7 +354,7 @@
               <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 mb-4">
                 <div class="grid grid-cols-2 gap-3 divide-x divide-slate-800">
                   <div class="text-center">
-                    <span class="text-[10px] font-bold text-slate-400 block uppercase">Chi-Square ($\chi^2$)</span>
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase">Chi-Square (χ²)</span>
                     <span id="stat-chi2" class="text-xl font-bold text-white mono">0.0452</span>
                   </div>
                   <div class="text-center">
@@ -338,7 +373,7 @@
               <div>
                 <h4 id="hwe-verdict-title" class="text-xs font-extrabold uppercase tracking-wider">HWE Compliant</h4>
                 <p id="hwe-verdict-body" class="text-[10.5px] leading-relaxed text-slate-300">
-                  No statistical deviation detected ($P \ge 0.05$). The observed frequencies correspond perfectly to genetic equilibrium.
+                  No statistical deviation detected (P ≥ 0.05). The observed frequencies correspond perfectly to genetic equilibrium.
                 </p>
               </div>
             </div>
@@ -348,7 +383,7 @@
           <div class="md:col-span-5 bg-panel border border-brand-950/40 rounded-2xl p-5 flex flex-col items-center justify-between">
             <div class="w-full text-center">
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1">Equilibrium Parabola</h3>
-              <p class="text-[10px] text-slate-500">Live coordinates of major allele ($p$) vs Obs Heterozygosity</p>
+              <p class="text-[10px] text-slate-500">Live coordinates of major allele (p) vs Obs Heterozygosity</p>
             </div>
             
             <div class="relative w-full aspect-square max-w-[160px] my-3">
@@ -394,7 +429,7 @@
             </div>
             
             <button onclick="generateAiInsights()" id="btn-ai-generate" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold transition-all shadow-lg shadow-brand-950/40 border border-brand-500/20">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Calculate AI Insights
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ✨ Calculate AI Insights
             </button>
           </div>
 
@@ -411,12 +446,13 @@
             </button>
           </div>
 
-          <!-- AI Report Container -->
+          <!-- AI Report Container & TTS Explainer Audio Playback -->
           <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 min-h-[140px] relative">
+            
             <!-- Loading Backdrop -->
-            <div id="ai-loading" class="absolute inset-0 bg-slate-950/90 rounded-xl flex flex-col items-center justify-center hidden">
+            <div id="ai-loading" class="absolute inset-0 bg-slate-950/90 rounded-xl flex flex-col items-center justify-center hidden z-10">
               <div class="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin mb-2"></div>
-              <p class="text-xs font-bold text-brand-300">Consulting Gemini 2.5 Flash...</p>
+              <p id="ai-loading-text" class="text-xs font-bold text-brand-300">Consulting Gemini 2.5 Flash...</p>
               <p class="text-[10px] text-slate-500 mt-0.5">Calculating evolutionary forces and statistical error rates</p>
             </div>
 
@@ -433,12 +469,29 @@
             <div id="ai-output" class="hidden">
               <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800/40">
                 <span class="text-[9px] uppercase tracking-wider font-extrabold text-brand-400" id="ai-report-badge">Evolutionary Analysis</span>
-                <button onclick="copyAiOutput()" class="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors" title="Copy to clipboard">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                </button>
+                <div class="flex items-center gap-1">
+                  <!-- TTS Audio Playback Button -->
+                  <button id="tts-audio-btn" onclick="speakCurrentReport()" class="p-1 px-2.5 rounded-lg text-brand-400 hover:text-brand-300 bg-brand-500/10 border border-brand-500/20 text-[10px] flex items-center gap-1 transition-all" title="Read report with high-fidelity Gemini Speech synthesis">
+                    <i data-lucide="volume-2" class="w-3 h-3"></i> ✨ Listen Explainer
+                  </button>
+                  <button onclick="copyAiOutput()" class="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors" title="Copy to clipboard">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
               </div>
               <div id="ai-text-content" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap max-h-[300px] overflow-y-auto pr-2">
                 <!-- Response gets rendered here -->
+              </div>
+              <!-- Mini Audio Player -->
+              <div id="audio-player-container" class="mt-3 p-2 bg-slate-900 border border-slate-800 rounded-lg flex items-center gap-3 hidden">
+                <button id="play-pause-btn" class="p-1.5 rounded-full bg-brand-600 text-white hover:bg-brand-500" onclick="toggleAudio()">
+                  <i data-lucide="play" class="w-4 h-4" id="play-pause-icon"></i>
+                </button>
+                <div class="flex-grow">
+                  <div class="text-[9px] text-brand-400 font-bold">✨ Gemini Natural Voice Explainer</div>
+                  <div class="text-[8px] text-slate-500">Interactive wav transcription</div>
+                </div>
+                <audio id="tts-audio" class="hidden" onended="onAudioEnded()"></audio>
               </div>
             </div>
           </div>
@@ -504,16 +557,31 @@
   <!-- JavaScript Logics -->
   <script>
     // App Constants & State variables
+    const apiKey = ""; // Platform-supplied runtime key automatically injected here on compile/deployment
+    let customApiKey = ''; // Local overrides configured manually by the user
     let currentTab = 'biallelic';
-    let apiKey = '';
     let selectedMode = 'evolutionary';
     let computedData = {}; // Global state container for computed parameters
+    let explainerAudio = null;
 
     // Lucide Icons initialization
     document.addEventListener("DOMContentLoaded", function() {
       lucide.createIcons();
+      checkPlatformKeyStatus();
       runCalculations();
     });
+
+    // Automatically check if Vercel / environment has provided an API key on load
+    function checkPlatformKeyStatus() {
+      const statusBadge = document.getElementById('apiStatusText');
+      if (apiKey && apiKey !== "") {
+        statusBadge.textContent = 'Gemini AI Active';
+        statusBadge.parentElement.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:border-emerald-400 transition-all cursor-pointer";
+        showToast('Connected', 'Platform Gemini key recognized and active automatically.', 'success');
+      } else {
+        statusBadge.textContent = 'Setup Gemini AI';
+      }
+    }
 
     // Theme control
     let isDark = true;
@@ -534,22 +602,21 @@
     // Modal Control
     function openApiKeyModal() {
       document.getElementById('api-key-modal').classList.remove('hidden');
-      document.getElementById('input-api-key').value = apiKey;
+      document.getElementById('input-api-key').value = customApiKey;
     }
     function closeApiKeyModal() {
       document.getElementById('api-key-modal').classList.add('hidden');
     }
     function saveApiKey() {
-      apiKey = document.getElementById('input-api-key').value.trim();
+      customApiKey = document.getElementById('input-api-key').value.trim();
       const statusBadge = document.getElementById('apiStatusText');
-      if (apiKey) {
+      
+      if (customApiKey) {
         statusBadge.textContent = 'API Key Configured';
-        statusBadge.parentElement.classList.add('border-brand-500', 'text-brand-300');
-        showToast('Success', 'Gemini API key updated.', 'success');
+        statusBadge.parentElement.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border border-brand-500 bg-brand-500/10 text-brand-300 hover:border-brand-400 transition-all cursor-pointer";
+        showToast('Success', 'Manual override Gemini API key updated.', 'success');
       } else {
-        statusBadge.textContent = 'Setup Gemini AI';
-        statusBadge.parentElement.classList.remove('border-brand-500', 'text-brand-300');
-        showToast('Info', 'API key cleared. Utilizing environment tokens if present.', 'info');
+        checkPlatformKeyStatus(); // Reset to check the platform-injected status
       }
       closeApiKeyModal();
     }
@@ -846,6 +913,92 @@
       updateDeFinettiParabola(p1, n12/N + n13/N);
     }
 
+    function applyPreset(presetKey) {
+      const p = PRESETS[presetKey];
+      if (!p) return;
+      
+      switchTab(p.tab);
+      if (p.tab === 'biallelic') {
+        document.getElementById('count-AA').value = p.counts.AA;
+        document.getElementById('count-Aa').value = p.counts.Aa;
+        document.getElementById('count-aa').value = p.counts.aa;
+        document.getElementById('allele-1-name').value = p.labels.L1;
+        document.getElementById('allele-2-name').value = p.labels.L2;
+      }
+      showToast('Loaded', `Case study preset '${presetKey.toUpperCase()}' applied.`, 'success');
+      runCalculations();
+    }
+
+    // Sequence & Tabular Genotype Parser Engine
+    function parseAndInjectData() {
+      const input = document.getElementById('raw-sequence-input').value.trim();
+      if (!input) {
+        showToast('Error', 'Input text area is empty.', 'error');
+        return;
+      }
+
+      // Universal cleaner & format separator standardizer
+      const cleanedInput = input.toUpperCase().replace(/[\/\t,]/g, ' ');
+      const tokens = cleanedInput.split(/\s+/).filter(Boolean);
+      
+      if (tokens.length === 0) {
+        showToast('Error', 'Unable to extract recognizable genetic patterns.', 'error');
+        return;
+      }
+
+      let AA = 0, Aa = 0, aa = 0;
+      let majorAllele = '', minorAllele = '';
+
+      // Check if we are dealing with double letter genotypes (e.g. AG GG) or single allele tokens
+      const isPairs = tokens[0].length === 2;
+
+      if (isPairs) {
+        // Find set of distinct single letters to represent alleles
+        const letters = [...new Set(tokens.join(''))];
+        majorAllele = letters[0] || 'A';
+        minorAllele = letters[1] || 'G';
+
+        tokens.forEach(tok => {
+          if (tok === majorAllele + majorAllele) AA++;
+          else if (tok === minorAllele + minorAllele) aa++;
+          else if (tok === majorAllele + minorAllele || tok === minorAllele + majorAllele) Aa++;
+        });
+      } else {
+        // Individual token alleles (e.g., [A, A, G, G, A, G])
+        const counts = {};
+        tokens.forEach(tok => {
+          counts[tok] = (counts[tok] || 0) + 1;
+        });
+
+        const sortedAlleles = Object.keys(counts).sort((x, y) => counts[y] - counts[x]);
+        majorAllele = sortedAlleles[0] || 'A';
+        minorAllele = sortedAlleles[1] || 'a';
+
+        // Reconstruct genotypes under random pairing simulation
+        const totalA = counts[majorAllele] || 0;
+        const totala = counts[minorAllele] || 0;
+        const totalN = totalA + totala;
+        if (totalN > 0) {
+          const p = totalA / totalN;
+          const q = totala / totalN;
+          const N = Math.floor(totalN / 2);
+          AA = Math.round(p * p * N);
+          Aa = Math.round(2 * p * q * N);
+          aa = N - (AA + Aa);
+        }
+      }
+
+      // Load into Inputs
+      document.getElementById('count-AA').value = AA;
+      document.getElementById('count-Aa').value = Aa;
+      document.getElementById('count-aa').value = aa;
+      document.getElementById('allele-1-name').value = majorAllele;
+      document.getElementById('allele-2-name').value = minorAllele;
+
+      showToast('Parsed Successfully', `Determined major/minor markers: ${majorAllele}/${minorAllele}. Simulated counts mapped.`, 'success');
+      switchTab('biallelic');
+    }
+
     // Mathematical approximations for Chi-Square CDF
     function computeChiSquarePValue(chi2, df) {
       if (chi2 < 0 || df < 1) return 1.0;
@@ -940,39 +1093,285 @@
       });
     }
 
-    // Call Gemini 2.5 Flash API with exponential backoff retry logic
-    async function callGemini(payload) {
-      const actualKey = apiKey || ""; // Automatically handles local storage configuration or blank
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${actualKey}`;
+    // Call Gemini 2.5 Flash API with robust fallback model chains for deployments
+    async function callGemini(payload, modelOverride) {
+      const actualKey = customApiKey || apiKey || ""; 
       
-      let delay = 1000;
-      for (let attempt = 0; attempt < 5; attempt++) {
-        try {
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          if (response.ok) {
-            return await response.json();
-          }
-          if (response.status === 429) {
-            // Trigger Exponential Backoff
+      if (!actualKey) {
+        throw new Error("No API key available. Please configure your key in the 'Setup Gemini AI' dialog.");
+      }
+
+      // Chain fallback model array to handle environment constraints automatically
+      const modelsToTry = modelOverride 
+        ? [modelOverride] 
+        : ["gemini-2.5-flash-preview-09-2025", "gemini-2.5-flash", "gemini-1.5-flash"];
+
+      let lastError = null;
+
+      for (const model of modelsToTry) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${actualKey}`;
+        let delay = 1000;
+        
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+              return await response.json();
+            }
+            
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData.error?.message || "";
+            
+            // If the model was not found or supported, try the next model in the chain instantly
+            if (response.status === 404 || errMsg.includes("not found") || errMsg.includes("not supported")) {
+              lastError = new Error(errMsg || `Model ${model} not found.`);
+              break; // Breaks attempt retry loop, moving to next model
+            }
+
+            if (response.status === 429) {
+              await new Promise(resolve => setTimeout(resolve, delay));
+              delay *= 2;
+              continue;
+            }
+            
+            throw new Error(errMsg || `API returned error code ${response.status}`);
+          } catch (error) {
+            lastError = error;
+            if (attempt === 2) break;
             await new Promise(resolve => setTimeout(resolve, delay));
             delay *= 2;
-            continue;
           }
-          throw new Error(`API returned error code ${response.status}`);
-        } catch (error) {
-          if (attempt === 4) throw error;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2;
         }
       }
-      throw new Error("API call failed after maximum retries.");
+      throw lastError || new Error("API call failed.");
     }
 
+    // AI Population Scenario Simulation Generator
+    async function generateScenarioPopulation() {
+      const promptText = document.getElementById('ai-scenario-prompt').value.trim();
+      if (!promptText) {
+        showToast('Info', 'Please describe an evolutionary scenario first.', 'info');
+        return;
+      }
+
+      showToast('Generating', 'Gemini is modeling population parameters...', 'info');
+
+      const systemPrompt = "You are a master evolutionary biologist. Based on the user's scenario, generate realistic genotypic counts. You must return your response as a valid JSON object ONLY, with no extra text or markdown formatting. The JSON must contain: { \"majorAllele\": \"string\", \"minorAllele\": \"string\", \"homMajor\": number, \"hetero\": number, \"homMinor\": number } where counts are realistic, non-negative integers summing to between 50 and 500.";
+      const payload = {
+        contents: [{ parts: [{ text: `Scenario: ${promptText}` }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              majorAllele: { type: "STRING" },
+              minorAllele: { type: "STRING" },
+              homMajor: { type: "INTEGER" },
+              hetero: { type: "INTEGER" },
+              homMinor: { type: "INTEGER" }
+            },
+            required: ["majorAllele", "minorAllele", "homMajor", "hetero", "homMinor"]
+          }
+        }
+      };
+
+      try {
+        const result = await callGemini(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const data = JSON.parse(text);
+
+        // Inject simulated parameters into the system
+        switchTab('biallelic');
+        document.getElementById('count-AA').value = data.homMajor;
+        document.getElementById('count-Aa').value = data.hetero;
+        document.getElementById('count-aa').value = data.homMinor;
+        document.getElementById('allele-1-name').value = data.majorAllele;
+        document.getElementById('allele-2-name').value = data.minorAllele;
+
+        runCalculations();
+        showToast('Success', 'AI scenario loaded into genotype inputs!', 'success');
+      } catch (err) {
+        showToast('Simulation Error', err.message || 'Failed to simulate scenario.', 'error');
+      }
+    }
+
+    // AI SNP and Gene Encyclopedia lookup Agent
+    async function lookupGeneOrSnp() {
+      const lookupTerm = document.getElementById('ai-lookup-input').value.trim();
+      const outputBox = document.getElementById('ai-lookup-box');
+      
+      if (!lookupTerm) {
+        showToast('Info', 'Please enter a SNP variant (e.g. rs4988235) or Gene name.', 'info');
+        return;
+      }
+
+      showToast('Searching', 'Connecting to Gemini Genome database...', 'info');
+      outputBox.classList.remove('hidden');
+      outputBox.innerHTML = `<div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-full border border-t-transparent border-brand-500 animate-spin"></div> Fetching genetic literature...</div>`;
+
+      const prompt = `Provide a concise, expert clinical and population summary for: "${lookupTerm}". Mention typical chromosomal locus, major associated traits/diseases, global major/minor allele frequencies, and biological pathways affected. Keep the response to 3-4 highly informative sentences.`;
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        systemInstruction: { parts: [{ text: "You are an authority on genomics and clinical molecular biology." }] }
+      };
+
+      try {
+        const result = await callGemini(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          outputBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">✨ Encyclopedia: ${lookupTerm}</div>${text}`;
+        } else {
+          throw new Error("No database records returned.");
+        }
+      } catch (err) {
+        outputBox.innerHTML = `<span class="text-rose-400">Error retrieving variant data: ${err.message}</span>`;
+      }
+    }
+
+    // High fidelity Text-to-Speech Explainer
+    async function speakCurrentReport() {
+      const reportText = document.getElementById('ai-text-content').textContent;
+      if (!reportText) {
+        showToast('Info', 'Please calculate insights first before listening to the explainer.', 'info');
+        return;
+      }
+
+      const loaderText = document.getElementById('ai-loading-text');
+      const loader = document.getElementById('ai-loading');
+      loaderText.textContent = "Synthesizing Vocal Explainer...";
+      loader.classList.remove('hidden');
+
+      // Prepare reading script summary
+      const readingScript = `Summarizing the genetic metrics of your population: ` + reportText.substring(0, 400) + "...";
+
+      const payload = {
+        contents: [{ parts: [{ text: `Say clearly: ${readingScript}` }] }],
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: "Fenrir" // Rich voice
+              }
+            }
+          }
+        }
+      };
+
+      try {
+        const result = await callGemini(payload, "gemini-2.5-flash-preview-tts");
+        const inlineData = result.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+        
+        if (inlineData && inlineData.data) {
+          const base64Audio = inlineData.data;
+          const mimeType = inlineData.mimeType || "audio/L16;rate=24000";
+          
+          const rateMatch = mimeType.match(/rate=(\d+)/);
+          const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+          
+          const audioBlob = pcmToWavBlob(base64ToUint8Array(base64Audio), sampleRate);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          const audioElement = document.getElementById('tts-audio');
+          audioElement.src = audioUrl;
+          
+          document.getElementById('audio-player-container').classList.remove('hidden');
+          toggleAudio(); // Start playing
+          showToast('Audio Ready', 'Press play on the controller to hear explainer.', 'success');
+        } else {
+          throw new Error("Speech synthesis did not return an audio stream.");
+        }
+      } catch (err) {
+        showToast('Speech Error', err.message || 'Vocalizer synthesis failed.', 'error');
+      } finally {
+        loader.classList.add('hidden');
+        loaderText.textContent = "Consulting Gemini 2.5 Flash...";
+      }
+    }
+
+    // Audio Playback Utilities
+    function toggleAudio() {
+      const audio = document.getElementById('tts-audio');
+      const icon = document.getElementById('play-pause-icon');
+      if (audio.paused) {
+        audio.play();
+        icon.setAttribute('data-lucide', 'pause');
+      } else {
+        audio.pause();
+        icon.setAttribute('data-lucide', 'play');
+      }
+      lucide.createIcons();
+    }
+
+    // Audio callbacks
+    function onAudioEnded() {
+      const icon = document.getElementById('play-pause-icon');
+      icon.setAttribute('data-lucide', 'play');
+      lucide.createIcons();
+    }
+
+    // Convert raw signed 16-bit PCM buffer to compliant WAVE format Blob
+    function pcmToWavBlob(pcmData, sampleRate) {
+      const buffer = new ArrayBuffer(44 + pcmData.length);
+      const view = new DataView(buffer);
+
+      /* RIFF identifier */
+      writeString(view, 0, 'RIFF');
+      /* file length */
+      view.setUint32(4, 36 + pcmData.length, true);
+      /* RIFF type */
+      writeString(view, 8, 'WAVE');
+      /* format chunk identifier */
+      writeString(view, 12, 'fmt ');
+      /* format chunk length */
+      view.setUint32(16, 16, true);
+      /* sample format (raw PCM = 1) */
+      view.setUint16(20, 1, true);
+      /* channel count (mono) */
+      view.setUint16(22, 1, true);
+      /* sample rate */
+      view.setUint32(24, sampleRate, true);
+      /* byte rate (sampleRate * blockAlign) */
+      view.setUint32(28, sampleRate * 2, true);
+      /* block align (channelCount * bytesPerSample) */
+      view.setUint16(32, 2, true);
+      /* bits per sample */
+      view.setUint16(34, 16, true);
+      /* data chunk identifier */
+      writeString(view, 36, 'data');
+      /* data chunk length */
+      view.setUint32(40, pcmData.length, true);
+
+      // Write PCM bytes
+      const rawData = new Uint8Array(buffer, 44);
+      rawData.set(pcmData);
+
+      return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    function base64ToUint8Array(base64) {
+      const binaryString = atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    // AI Report Generation Trigger
     async function generateAiInsights() {
       const loader = document.getElementById('ai-loading');
       const initialState = document.getElementById('ai-initial-state');
@@ -1032,7 +1431,7 @@
           throw new Error("Malformed response format received.");
         }
       } catch (err) {
-        showToast('Integration Error', 'Failed to communicate with AI endpoint. Please verify your internet connection or API Key.', 'error');
+        showToast('Integration Error', err.message || 'Failed to communicate with AI endpoint.', 'error');
         initialState.classList.remove('hidden');
       } finally {
         loader.classList.add('hidden');
